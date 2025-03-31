@@ -6,25 +6,29 @@ contract Walnut {
     uint256 shellStrength; // The current shell strength.
     uint256 round; // The current round number.
 
-    uint256 initialKernel; // The initial hidden kernel value for resets.
-    uint256 kernel; // The current hidden kernel value.
+    suint256 initialKernel; // The initial hidden kernel value for resets.
+    suint256 kernel; // The current hidden kernel value.
 
     // Tracks the number of hits per player per round.
     mapping(uint256 => mapping(address => uint256)) hitsPerRound;
 
     // Events to log hits, shakes, and resets.
-    event Hit(uint256 indexed round, address indexed hitter, uint256 remaining);
-    event Shake(uint256 indexed round, address indexed shaker);
+
+    // Event to log hits.
+    event Hit(uint256 indexed round, address indexed hitter, uint256 remaining); // Logged when a hit occurs.
+    // Event to log shakes.
+    event Shake(uint256 indexed round, address indexed shaker); // Logged when the Walnut is shaken.
+    // Event to log resets.
     event Reset(uint256 indexed newRound, uint256 remainingShellStrength);
 
-    constructor(uint256 _shellStrength, uint256 _kernel) {
-        initialShellStrength = _shellStrength;
-        shellStrength = _shellStrength;
+    constructor(uint256 _shellStrength, suint256 _kernel) {
+        initialShellStrength = _shellStrength; // Set the initial shell strength.
+        shellStrength = _shellStrength; // Initialize the shell strength.
 
-        initialKernel = _kernel;
-        kernel = _kernel;
+        initialKernel = _kernel; // Set the initial kernel value.
+        kernel = _kernel; // Initialize the kernel value.
 
-        round = 1;
+        round = 1; // Start with the first round.
     }
 
     // Get the current shell strength.
@@ -34,27 +38,28 @@ contract Walnut {
 
     // Hit the Walnut to reduce its shell strength.
     function hit() public requireIntact {
-        shellStrength--;
-        hitsPerRound[round][msg.sender]++;
-        emit Hit(round, msg.sender, shellStrength);
+        shellStrength--; // Decrease the shell strength.
+        hitsPerRound[round][msg.sender]++; // Record the player's hit for the current round.
+        emit Hit(round, msg.sender, shellStrength); // Log the hit.
     }
 
-    function shake(uint256 _numShakes) public requireIntact {
-        kernel += _numShakes;
-        emit Shake(round, msg.sender);
+    // Shake the Walnut to increase the kernel value.
+    function shake(suint256 _numShakes) public requireIntact {
+        kernel += _numShakes; // Increment the kernel value.
+        emit Shake(round, msg.sender); // Log the shake.
     }
 
     // Reset the Walnut for a new round.
     function reset() public requireCracked {
-        shellStrength = initialShellStrength;
-        kernel = initialKernel;
-        round++;
-        emit Reset(round, shellStrength);
+        shellStrength = initialShellStrength; // Reset the shell strength.
+        kernel = initialKernel; // Reset the kernel value.
+        round++; // Move to the next round.
+        emit Reset(round, shellStrength); // Log the reset.
     }
 
     // Look at the kernel if the shell is cracked and the caller contributed.
     function look() public view requireCracked onlyContributor returns (uint256) {
-        return kernel;
+        return uint256(kernel); // Return the kernel value.
     }
 
     // Modifier to ensure the shell is fully cracked.
